@@ -73,6 +73,7 @@ sed -i "s/>MAPNAME/$MAPNAME/g" $OSM_NL_ARGS
 sed -i "s/>BOUNDSZIP/$BOUNDSZIP/g" $OSM_NL_ARGS
 sed -i "s/>SEAZIP/$SEAZIP/g" $OSM_NL_ARGS
 sed -i "s/>STYLE/$STYLE/g" $OSM_NL_ARGS
+sed -i "s/>COUNTRY/$COUNTRY/g" $OSM_NL_ARGS
 
 sed -i "s/>FID/$FID/g" $NSI
 sed -i "s/>MAPNAME/$MAPNAME/g" $NSI

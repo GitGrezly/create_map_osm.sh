@@ -65,7 +65,7 @@ mkdir $COUNTRY
 
 cp -v maps/$OSM_NL_ARGS $COUNTRY/
 cp -v maps/$NSI $COUNTRY/
-cp ../typ/$TYP $COUNTRY/$FID.typ
+cp typ/$TYP $COUNTRY/$FID.typ
 cd $COUNTRY
 echo "licentie" > license.txt
 sed -i "s/>FID/$FID/g" $OSM_NL_ARGS

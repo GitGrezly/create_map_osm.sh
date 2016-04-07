@@ -6,16 +6,18 @@ OSM_NL_ARGS='osm_nl.args'
 BOUNDSZIP='\.\.\/boundary\/bounds\.zip'
 SEAZIP='\.\.\/boundary\/sea\.zip'
 STYLE='\.\.\/styles\/mkgmap\-style\-sheets\-master\/styles\/Openfietsmap\ full'
-TYP='40010.typ'
+TYP='40010.txt'
 NSI='openfietsmap.nsi'
 GEHEUGEN="4000"
 LOGFILE='log.log'
+DIR_SPLITTER='../splitter-r435'
+DIR_MKGMAP='../mkgmap-r3674'
+LICENTIE_TEKST='Licentie tekst'
 case $COUNTRY in
     'netherlands')
-    FID='10010' 
-    HEX="1A27"
+    FID='25010' 
+    HEX="B261"
     ;;
-
     'belgium')
     FID='20010' 
     HEX="2A4E"
@@ -60,8 +62,9 @@ then
     wget http://download.geofabrik.de/europe/$COUNTRY.poly
 fi
 
-
 MAPNAME=$FID"000"
+MAPID=$FID"001"
+
 if [ -d "$COUNTRY" ];
 then
     rm -rfv $COUNTRY
@@ -71,9 +74,10 @@ mkdir $COUNTRY
 
 cp -v maps/$OSM_NL_ARGS $COUNTRY/
 cp -v maps/$NSI $COUNTRY/
-cp typ/$TYP $COUNTRY/$FID.typ
+cp -v typ/$TYP $COUNTRY/$FID.txt
+
 cd $COUNTRY
-echo "licentie" > license.txt
+echo $LICENTIE_TEKST > license.txt
 sed -i "s/>FID/$FID/g" $OSM_NL_ARGS
 sed -i "s/>MAPNAME/$MAPNAME/g" $OSM_NL_ARGS
 sed -i "s/>BOUNDSZIP/$BOUNDSZIP/g" $OSM_NL_ARGS
@@ -85,6 +89,8 @@ sed -i "s/>FID/$FID/g" $NSI
 sed -i "s/>MAPNAME/$MAPNAME/g" $NSI
 sed -i "s/>HEX/$HEX/g" $NSI
 sed -i "s/>COUNTRY/$COUNTRY/g" $NSI
+
+sed -i "s/>FID/$FID/g" $FID.txt
 
 echo "--> Zorg voor de contouren"
 cmd1="osmconvert ../maps/Hoehendaten_Freizeitkarte_EUROPE.osm.pbf -v -B=../$COUNTRY.poly -o=contours_$COUNTRY.o5m"
@@ -118,7 +124,7 @@ fi
 pos2=`date +%s`
 runtime=$((pos2-pos1))
 echo "--> Split de bestanden $runtime"
-cmd3="java -Xmx"$GEHEUGEN"m -jar ../splitter-r435/splitter.jar  --output=o5m --output-dir=$COUNTRY --max-nodes=100000 --mapid=$MAPNAME --geonames-file=../maps/cities15000.txt --polygon-file=../$COUNTRY.poly $COUNTRY.osm.o5m"
+cmd3="java -Xmx"$GEHEUGEN"m -jar $DIR_SPLITTER/splitter.jar  --output=o5m --output-dir=$COUNTRY --max-nodes=1400000 --mapid=$MAPID --geonames-file=../maps/cities15000.txt --polygon-file=../$COUNTRY.poly $COUNTRY.osm.o5m"
 echo -e "Start \e[1;31m$cmd3\e[0m"
 $cmd3 >> $LOGFILE
 echo -e "Stop \e[1;31m$cmd3\e[0m"
@@ -134,7 +140,7 @@ fi
 pos3=`date +%s`
 runtime=$((pos3-pos2))
 echo "--> Maak het bestand aan $runtime"
-cmd4="java -Xms"$GEHEUGEN"m -Xmx"$GEHEUGEN"m -jar ../mkgmap-r3674/mkgmap.jar --index --route -c $OSM_NL_ARGS -c $COUNTRY/template.args  $FID.typ"
+cmd4="java -Xms"$GEHEUGEN"m -Xmx"$GEHEUGEN"m -jar #DIR_MKGMAP/mkgmap.jar -c $OSM_NL_ARGS -c $COUNTRY/template.args  $FID.txt"
 echo -e "Start \e[1;31m$cmd4\e[0m"
 $cmd4 >> $LOGFILE
 echo -e "Stop \e[1;31m$cmd4\e[0m"

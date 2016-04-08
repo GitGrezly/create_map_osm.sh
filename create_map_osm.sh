@@ -140,7 +140,7 @@ fi
 pos3=`date +%s`
 runtime=$((pos3-pos2))
 echo "--> Maak het bestand aan $runtime"
-cmd4="java -Xms"$GEHEUGEN"m -Xmx"$GEHEUGEN"m -jar #DIR_MKGMAP/mkgmap.jar -c $OSM_NL_ARGS -c $COUNTRY/template.args  $FID.txt"
+cmd4="java -Xms"$GEHEUGEN"m -Xmx"$GEHEUGEN"m -jar $DIR_MKGMAP/mkgmap.jar -c $OSM_NL_ARGS -c $COUNTRY/template.args  $FID.txt"
 echo -e "Start \e[1;31m$cmd4\e[0m"
 $cmd4 >> $LOGFILE
 echo -e "Stop \e[1;31m$cmd4\e[0m"

@@ -1,11 +1,17 @@
 #!/bin/bash
 start=`date +%s`
 COUNTRY=`echo $1 | awk '{print tolower($0)}'`
-COUNTRY_MAP='europe' #anders gelijk aan $COUNTRY
-#COUNTRY_MAP=$COUNTRY 
+#COUNTRY_MAP='europe' #anders gelijk aan $COUNTRY
+COUNTRY_MAP=$COUNTRY 
 OSM_NL_ARGS='osm_nl.args'
+#download van http://osm2.pleiades.uni-wuppertal.de/bounds/latest/
 BOUNDSZIP='\.\.\/boundary\/bounds\.zip'
+#download van http://osm2.pleiades.uni-wuppertal.de/sea/latest/
 SEAZIP='\.\.\/boundary\/sea\.zip'
+#download van http://develop.freizeitkarte-osm.de/ele_20_100_500/Hoehendaten_Freizeitkarte_EUROPE.osm.pbf
+CONTOUR_LINES='../maps/Hoehendaten_Freizeitkarte_EUROPE.osm.pbf'
+#download van http://download.geonames.org/export/dump/cities15000.zip
+CITIES='../maps/cities15000.txt'
 STYLE='\.\.\/styles\/mkgmap\-style\-sheets\-master\/styles\/Openfietsmap\ full'
 TYP='40010.txt'
 NSI='openfietsmap.nsi'
@@ -99,7 +105,7 @@ sed -i "s/>COUNTRY/$COUNTRY/g" $NSI
 sed -i "s/>FID/$FID/g" $FID.txt
 
 echo "--> Zorg voor de contouren"
-cmd1="osmconvert ../maps/Hoehendaten_Freizeitkarte_EUROPE.osm.pbf -v -B=../$COUNTRY.poly -o=contours_$COUNTRY.o5m"
+cmd1="osmconvert $CONTOUR_LINES -v -B=../$COUNTRY.poly -o=contours_$COUNTRY.o5m"
 echo -e "Start \e[1;31m$cmd1\e[0m"
 echo "$cmd1" >> $LOGFILE 2>&1
 $cmd1 > $LOGFILE 2>&1
@@ -132,7 +138,7 @@ fi
 pos2=`date +%s`
 runtime=$((pos2-pos1))
 echo "--> Split de bestanden $runtime"
-cmd3="java -Xmx"$GEHEUGEN"m -jar $DIR_SPLITTER/splitter.jar  --output=o5m --output-dir=$COUNTRY --max-nodes=1400000 --mapid=$MAPID --geonames-file=../maps/cities15000.txt --polygon-file=../$COUNTRY.poly $COUNTRY.osm.o5m"
+cmd3="java -Xmx"$GEHEUGEN"m -jar $DIR_SPLITTER/splitter.jar  --output=o5m --output-dir=$COUNTRY --max-nodes=1400000 --mapid=$MAPID --geonames-file=$CITIES --polygon-file=../$COUNTRY.poly $COUNTRY.osm.o5m"
 echo -e "Start \e[1;31m$cmd3\e[0m"
 echo "$cmd3" >> $LOGFILE 2>&1
 $cmd3 >> $LOGFILE

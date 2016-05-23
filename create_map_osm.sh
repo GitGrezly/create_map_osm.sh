@@ -1,7 +1,8 @@
 #!/bin/bash
 start=`date +%s`
 COUNTRY=`echo $1 | awk '{print tolower($0)}'`
-#COUNTRY_MAP='europe' #anders gelijk aan $COUNTRY
+#verander COUNTRY_MAP naar 'europe'  wil je uit de europe map de gegevens halen
+#COUNTRY_MAP='europe' 
 COUNTRY_MAP=$COUNTRY 
 OSM_NL_ARGS='osm_nl.args'
 #download van http://osm2.pleiades.uni-wuppertal.de/bounds/latest/
@@ -80,6 +81,7 @@ MAPID=$FID"001"
 if [ -d "$COUNTRY" ];
 then
     rm -rfv $COUNTRY
+    rm -vf $COUNTRY.poly*
 fi
 
 mkdir $COUNTRY
@@ -109,13 +111,13 @@ cmd1="osmconvert $CONTOUR_LINES -v -B=../$COUNTRY.poly -o=contours_$COUNTRY.o5m"
 echo -e "Start \e[1;31m$cmd1\e[0m"
 echo "$cmd1" >> $LOGFILE 2>&1
 $cmd1 > $LOGFILE 2>&1
-echo -e "Stop \e[1;31m$cmd1\e[0m"
 if [[ $? != 0 ]];
 then
     fc -ln -1
     echo "Contouren is extraheren is niet gelukt"
     exit $?; 
 fi
+echo -e "Stop \e[1;31m$cmd1\e[0m"
 
 fc -ln -1
 pos1=`date +%s`
@@ -126,14 +128,13 @@ cmd2="osmconvert --drop-version contours_$COUNTRY.o5m ../$COUNTRY_MAP-latest.osm
 echo -e "Start \e[1;31m$cmd2\e[0m"
 echo "$cmd2" >> $LOGFILE 2>&1
 $cmd2 >> $LOGFILE 2>&1
-echo -e "Stop \e[1;31m$cmd2\e[0m"
 if [[ $? != 0 ]];
 then
     fc -ln -1
     echo "Contouren is extraheren uit Europe map is niet gelukt"
     exit $?; 
 fi
-
+echo -e "Stop \e[1;31m$cmd2\e[0m"
 
 pos2=`date +%s`
 runtime=$((pos2-pos1))
@@ -142,15 +143,13 @@ cmd3="java -Xmx"$GEHEUGEN"m -jar $DIR_SPLITTER/splitter.jar  --output=o5m --outp
 echo -e "Start \e[1;31m$cmd3\e[0m"
 echo "$cmd3" >> $LOGFILE 2>&1
 $cmd3 >> $LOGFILE
-echo -e "Stop \e[1;31m$cmd3\e[0m"
-
 if [[ $? != 0 ]];
 then
     fc -ln -1
     echo "Het splitsen van de bestanden is niet gelukt"
     exit $?; 
 fi
-
+echo -e "Stop \e[1;31m$cmd3\e[0m"
 
 pos3=`date +%s`
 runtime=$((pos3-pos2))
@@ -159,13 +158,13 @@ cmd4="java -Xms"$GEHEUGEN"m -Xmx"$GEHEUGEN"m -jar $DIR_MKGMAP/mkgmap.jar -c $OSM
 echo -e "Start \e[1;31m$cmd4\e[0m"
 echo "$cmd4" >> $LOGFILE 2>&1
 $cmd4 >> $LOGFILE
-echo -e "Stop \e[1;31m$cmd4\e[0m"
 if [[ $? != 0 ]];
 then
     fc -ln -1
     echo "Het samenvoegen van de bestanden is niet gelukt"
     exit $?; 
 fi
+echo -e "Stop \e[1;31m$cmd4\e[0m"
 
 
 pos4=`date +%s`
@@ -175,10 +174,10 @@ cmd5="makensis  $NSI"
 echo -e "Start \e[1;31m$cmd5\e[0m"
 echo "$cmd5" >> $LOGFILE 2>&1
 $cmd5 >> $LOGFILE
-echo -e "Stop \e[1;31m$cmd5\e[0m"
 if [[ $? != 0 ]];
 then
     fc -ln -1
     echo "Het maken van het installatie bestand is niet gelukt"
     exit $?; 
 fi
+echo -e "Stop \e[1;31m$cmd5\e[0m"

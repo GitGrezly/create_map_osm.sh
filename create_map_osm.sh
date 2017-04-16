@@ -1,4 +1,5 @@
 #!/bin/bash
+JAVA='/home/dave/Downloads/jre1.8.0_91/bin/java'
 start=`date +%s`
 COUNTRY=`echo $1 | awk '{print tolower($0)}'`
 #verander COUNTRY_MAP naar 'europe'  wil je uit de europe map de gegevens halen
@@ -16,10 +17,10 @@ CITIES='../maps/cities15000.txt'
 STYLE='\.\.\/styles\/mkgmap\-style\-sheets\-master\/styles\/Openfietsmap\ full'
 TYP='40010.txt'
 NSI='openfietsmap.nsi'
-GEHEUGEN="4000"
+GEHEUGEN="3000"
 LOGFILE='log.log'
-DIR_SPLITTER='../splitter-r437'
-DIR_MKGMAP='../mkgmap-r3676'
+DIR_SPLITTER='../splitter-r435'
+DIR_MKGMAP='../mkgmap-r3674'
 LICENTIE_TEKST='Licentie tekst'
 case $COUNTRY in
     'netherlands')
@@ -72,16 +73,18 @@ esac
 if [ ! -f "$COUNTRY-latest.osm.pbf" ];
 then
     wget http://download.geofabrik.de/europe/$COUNTRY-latest.osm.pbf
-    wget http://download.geofabrik.de/europe/$COUNTRY.poly
 fi
-
+if [ ! -f "$COUNTRY.poly" ];
+then
+wget http://download.geofabrik.de/europe/$COUNTRY.poly
+fi
 MAPNAME=$FID"000"
 MAPID=$FID"001"
 
 if [ -d "$COUNTRY" ];
 then
     rm -rfv $COUNTRY
-    rm -vf $COUNTRY.poly*
+    #rm -vf $COUNTRY.poly*
 fi
 
 mkdir $COUNTRY
@@ -139,7 +142,7 @@ echo -e "Stop \e[1;31m$cmd2\e[0m"
 pos2=`date +%s`
 runtime=$((pos2-pos1))
 echo "--> Split de bestanden $runtime"
-cmd3="java -Xmx"$GEHEUGEN"m -jar $DIR_SPLITTER/splitter.jar  --output=o5m --output-dir=$COUNTRY --max-nodes=1400000 --mapid=$MAPID --geonames-file=$CITIES --polygon-file=../$COUNTRY.poly $COUNTRY.osm.o5m"
+cmd3="$JAVA -Xmx"$GEHEUGEN"m -jar $DIR_SPLITTER/splitter.jar  --output=o5m --output-dir=$COUNTRY --max-nodes=1400000 --mapid=$MAPID --geonames-file=$CITIES --polygon-file=../$COUNTRY.poly $COUNTRY.osm.o5m"
 echo -e "Start \e[1;31m$cmd3\e[0m"
 echo "$cmd3" >> $LOGFILE 2>&1
 $cmd3 >> $LOGFILE
@@ -154,7 +157,7 @@ echo -e "Stop \e[1;31m$cmd3\e[0m"
 pos3=`date +%s`
 runtime=$((pos3-pos2))
 echo "--> Maak het bestand aan $runtime"
-cmd4="java -Xms"$GEHEUGEN"m -Xmx"$GEHEUGEN"m -jar $DIR_MKGMAP/mkgmap.jar -c $OSM_NL_ARGS -c $COUNTRY/template.args  $FID.txt"
+cmd4="$JAVA -Xms"$GEHEUGEN"m -Xmx"$GEHEUGEN"m -jar $DIR_MKGMAP/mkgmap.jar -c $OSM_NL_ARGS -c $COUNTRY/template.args  $FID.txt"
 echo -e "Start \e[1;31m$cmd4\e[0m"
 echo "$cmd4" >> $LOGFILE 2>&1
 $cmd4 >> $LOGFILE
